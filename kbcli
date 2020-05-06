@@ -1,0 +1,117 @@
+#!/bin/bash
+
+declare -A URL
+declare -A DOCUMENT
+
+# URL settings
+#URL["EXAMPLE"]="https://example.com"
+
+# Document settings
+#DOCUMENT["Document", "index"]="example-documents"
+#DOCUMENT["Document", "type"]="documents"
+
+if [ "$1" == "search" ]; then
+  method="search"
+  shift
+elif [ "$1" == "find" ]; then
+  method="find"
+  shift
+elif [ "$1" == "mapping" ]; then
+  method="mappings"
+  shift
+elif [ "$1" == "mappings" ]; then
+  method="mappings"
+  shift
+elif [ "$1" == "setting" ]; then
+  method="settings"
+  shift
+elif [ "$1" == "settings" ]; then
+  method="settings"
+  shift
+elif [ "$1" == "show" ]; then
+  method="show"
+  shift
+elif [ "$1" == "analyze" ]; then
+  method="analyze"
+  shift
+else
+  method="find"
+fi
+
+if [ -n "$1" ] && [ -n ${URL["$1"]} ]; then
+  url=${URL["$1"]}
+else
+  url="$1"
+fi
+shift
+
+if [ -n "$1" ] && [ -n ${DOCUMENT["$1", "index"]} ]; then
+  index=${DOCUMENT["$1", "index"]}
+  type=${DOCUMENT["$1", "type"]}
+  shift
+else
+  index="$1"
+  type="$2"
+  shift 2
+fi
+
+if [ "$method" == "find" ]; then
+  id="$1"
+  _source="$2"
+  shift 2
+elif [ "$method" == "analyze" ]; then
+  analyzer="$1"
+  text="$2"
+  shift 2
+fi
+
+###
+
+function query() {
+  local type="$1"
+  if [ "$type" == "analyze" ]; then
+    local analyzer="$2"
+    local text="$3"
+    echo "{
+      \"analyzer\": \"$analyzer\",
+      \"text\": \"$text\" 
+    }"
+  fi
+}
+
+###
+
+if [ "$method" == "find" ]; then
+  if [ -n "$_source" ]; then
+    param="?_source=$_source"
+  fi
+  query="$url/$index/$type/$id$param"
+  echo "$query" 1>&2
+  curl "$query" -H "content-type: application/json" 2>/dev/null | jq '.'
+elif [ "$method" == "search" ]; then
+  query="$url/$index/$type/_search"
+  echo "$query" 1>&2
+  curl "$query" -H "content-type: application/json" -d "$(cat -)" 2>/dev/null | jq '.'
+elif [ "$method" == "mappings" ]; then
+  query="$url/$index/_mappings"
+  echo "$query" 1>&2
+  curl "$query" -H "content-type: application/json" 2>/dev/null | jq '.'
+elif [ "$method" == "settings" ]; then
+  query="$url/$index/_settings"
+  echo "$query" 1>&2
+  curl "$query" -H "content-type: application/json" 2>/dev/null | jq '.'
+elif [ "$method" == "show" ]; then
+  query="$url/$index/$type"
+  echo "$query"
+elif [ "$method" == "analyze" ]; then
+  if [ -n "$index" ]; then
+    query="$url/$index/_analyze"
+  else
+    query="$url/_analyze"
+  fi
+  if [ -z "$analyzer" ]; then
+    curl "$query" -H "content-type: application/json" -d "$(cat -)" 2>/dev/null | jq '.'
+  else
+    query "$method" "$analyzer" "$text" | curl "$query" -H "content-type: application/json" -d "$(cat -)" 2>/dev/null | jq '.'
+  fi
+fi
