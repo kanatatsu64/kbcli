@@ -42,7 +42,7 @@ Aliases are defined at the top of `kbcli` executable file.
 
 ### url ALIAS
 In order to define a url alias, add a item to `URL` hash.
-The addition should be done below the `URL setting` comment.
+The addition should be done below the `URL settings` comment.
 
 - #### example
 ```shell
@@ -50,7 +50,7 @@ The addition should be done below the `URL setting` comment.
 URL["EXAMPLE"]="https://example.com"
 ```
 
-With this definition, you can now use `EXAMPLE` alias for url. For example,
+With this definition, you can now use `EXAMPLE` alias for `<url>`. For example,
 ```shell
 kbcli find EXAMPLE documents example-documents 1
 ```
@@ -61,7 +61,7 @@ kbcli find https://example.com documents example-documents 1
 
 ### index & type ALIAS
 In order to define a index & type alias, add a item to `DOCUMENT` hash.
-The addition should be done below the `Document setting` comment.
+The addition should be done below the `Document settings` comment.
 
 - #### example
 ```shell
@@ -69,7 +69,7 @@ The addition should be done below the `Document setting` comment.
 DOCUMENT["Document", "index"]="example-documents"
 DOCUMENT["Document", "type"]="documents"
 ```
-With this definition, you can now use `Document` alias for url. For example,
+With this definition, you can now use `Document` alias for `<index> <type>`. For example,
 ```shell
 kbcli find https://example.com Document 1
 ```
