@@ -16,7 +16,7 @@ cp kbcli <your bin folder>
 ## USAGE
 
 ```shell
-kbcli [<command>] <url> <index> <type> [<command specific arguments>]
+kbcli [<command>] <url> <index> <type> [<command specific parameters>]
 ```
 
 If `<command>` is not specified, `find` is used.
